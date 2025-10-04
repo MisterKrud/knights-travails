@@ -7,24 +7,30 @@ class Node {
   }
 }
 const visited = new Set([])
+const adjacencyList = new Map()
+
+class Board{
+  constructor([row, col], [endRow, endCol]){
+    this.start = createData([row, col], [endRow, endCol])
+  }
+  countMoves(){
+   let startingCell = this.start;
+
+  }
+}
 
 
 //Get neighbours of square
-const getNeighbours = ([row, col]) => {
-  //End function if end coordinates match start coordinates (not working)
-  // if (row == endRow && col == endCol) {
-  //   return "-----------Game Over-----------------";
-  // } else {
-  //   //console.log to indicate function start
-    
-  // }
+const getNeighbours = ([row, col], [endRow, endCol]) => {
+  
   //Make a node of initial square
   let start = new Node(row, col);
   //add it to 'visited' set
-  visited.add(JSON.stringify([start.row, start.col]));
+ 
 
   //Don't allow numbers outside of 0-7 in coordinates
   const neighbourSet = new Set([]);
+  const neighbourCoords = []
   if (
     row < 0 ||
     row > 7 ||
@@ -38,111 +44,78 @@ const getNeighbours = ([row, col]) => {
 
 //Get neighbours coordinates by adding +/-1 & +/-2 to coordinates
   const coordModifiers = [[-1, 2], [1, 2], [-1, -2], [1, -2], [-2, 1], [2, 1], [-2, -1], [2, -1]];
-    coordModifiers.forEach(coord => {
+   const startCoordinates = (JSON.stringify(start.row)+','+JSON.stringify(start.col))
+    visited.add(startCoordinates);
+      for (let coord of coordModifiers) {
       const newRow = row+coord[0];
       const newCol = col+coord[1];
       if(newRow >=0 && newRow <=7 && newCol >=0 && newCol <=7){
+      if(newRow === endRow && newCol === endCol){
+        console.log(newRow, newCol)
+      }
+      
       const neighbour = new Node(newRow, newCol)
       start.neighbours.add(neighbour)
-       const neighbourCoordinates = JSON.stringify([neighbour.row, neighbour.col]);
-       neighbourSet.add(neighbourCoordinates);
-         if (!visited.has(neighbourCoordinates)) {
+      
+    
+    
+       const neighbourCoordinates = JSON.stringify(neighbour.row)+','+JSON.stringify(neighbour.col);
+       console.log(`START AND NEIGHBOUR COORDINATES`)
+       console.log(neighbourCoordinates)
+       console.log(startCoordinates)
+          if (!visited.has(neighbourCoordinates)) {
+       neighbourSet.add([neighbourCoordinates]);
+          neighbourCoords.push([neighbour.row, neighbour.col])
           visited.add(neighbourCoordinates);
          }
+         
       }
-    })
+    }
+   adjacencyList.set(startCoordinates, neighbourCoords);
   }
+  console.log(`Neighbour set`)
+  console.log(neighbourSet)
+ 
+  
 
- ;
-// console.log(`NEIGHBOURS: ${start.coordinates}`)
-// console.log(start.neighbours)
+
 
  return start;
 };
 
 
-const bfs = ([row, col], [endRow, endCol]) => {
+const createData = ([row, col], [endRow, endCol]) => {
    //Make a node of initial square
-  let start = getNeighbours([row, col]);
+  let start = getNeighbours([row, col], [endRow, endCol]);
   //add it to 'visited' set
-  visited.add(JSON.stringify([start.row, start.col]));
   const queueArray =[start];
-//  console.log(queueArray)
   while(queueArray.length>=1){
-    if(queueArray[0].row = endRow && queueArray[0].col === endCol){
-      console.log(`---------------End----------------`)
+    if(queueArray[0].row = endRow && queueArray[0].col === endCol){ 
       return
     }
-    // console.log(`[0]:${queueArray[0]}`)
-    // console.log(`row: ${queueArray[0].row}`)
-    // console.log(`col: ${queueArray[0].col}`)
-    
-    // console.log(queueArray[0].coordinates)
-    
+
     if(queueArray[0].neighbours !== null){
-
-      const neighbourList = queueArray[0].neighbours
-      // console.log(`QueueArray[0].neighbours`)
-      // console.log(queueArray[0])
-      
+      const neighbourList = queueArray[0].neighbours  
      neighbourList.forEach(neighbour => {
-
-        const newNeighbour = getNeighbours([neighbour.row, neighbour.col])
+        const newNeighbour = getNeighbours([neighbour.row, neighbour.col], [endRow, endCol])
         queueArray.push(newNeighbour)
       })
-      console.log(`QueueArray:`)
-      console.log(queueArray[0])
-      // const listQueueArray = () => {
-      //   queueArray.forEach(item=>{
-      //     return item.row
-      //   })
-      // }
-      // console.log(listQueueArray())
     } 
-    queueArray.shift(queueArray[0])
-  
-  
-    
+    queueArray.shift(queueArray[0])  
   }
+ return start
 }
 
   
 
-console.log(bfs([3,3],[7,7]))
-// console.log(`VISITED`)
-//   console.log(visited)
+console.log(createData([3,3],[2,5]))
+console.log(`<<<<<<<<<<<<<<<<<<<<<<<ALL MOVES>>>>>>>>>>>>>>>>>>>>>>>`)
 
-class Board{
-    constructor(startRow, startCol, endRow, endCol){
-        this.startRow = startRow;
-        this.startCol = startCol;
-        this.endRow = endRow;
-        this.endCol = endCol;
-        this.start = [startRow, startCol];
-        this.end = [endRow, endCol];
+console.log(`-----------------------`)
+console.log(adjacencyList)
 
-    }
-    #visited = new Set()
-
-    renderMoves([startRow, startCol],[endRow, endCol]){
-
-    }
-
-
-}
-
-
-class Tree {
-  constructor(arr) {
-    this.arr = this.arrayCleaner(arr);
-    this.root = buildTree(this.arr);
-  
-  }
-}
-
-
-
-
+console.log(visited)
+console.log(`%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%`)
 
 
 
