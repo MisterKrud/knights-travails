@@ -1,131 +1,141 @@
 
-const masterArray = []
 
 
-class Node{
-  constructor(row, col, distanceFromStart){
+
+
+
+
+class Node {
+  constructor(row, col) {
     this.row = row;
     this.col = col;
-    this.distanceFromStart = distanceFromStart;
+    this.neighbours = new Set([]);
+    this.coordinates = [row, col];
+
   }
-
 }
-let n=0
-const visited = new Set([])
 
-//find neighbouring nodes - this needs purging of unnecessary elements
-const knightMove = ([row, col], [lastRow, lastCol]) => {
+const visited = new Set([]);
+// const adjacencyList = new Map();
 
-  console.log(`knightMove`)
-  
-    if(row<0||row>7||row===undefined || col === undefined || col>7 || col===undefined){
-        throw new Error("2 coordinates between 0 & 7 required")
-    }
-// const destinations = []
-const coordModifiers = [[-1, 1], [-2, 2]]
-// const adjacencyList =[]
-// const adjList = []
+//Get neighbours of square
+const getNeighbours = ([row, col]) => {
+  //Make a node of initial square
+  let start = new Node(row, col);
 
+  //Don't allow numbers outside of 0-7 in coordinates
 
-const coordLinks = []
-const startPosition = new Node(row, col, n)
-
-
-    coordModifiers[0].forEach(a => {
-       coordModifiers[1].forEach(b => {
-      
-        // console.log(`current elements:`)
-        //     console.log(`row: ${row}, col: ${col}`)
-        //     console.log(`lastRow: ${lastRow}, lastCol: ${lastCol} `)
-        //     console.log(`a: ${a}, b: ${b}`)
-        if((row+a)>=0 && (row+a<=7) && (col+b)>=0 && (col+b)<=7){
-          const newRow = row+a;
-        const newCol = col+b
-          //  destinations.push([newRow, newCol])
-          //  coordLinks.push([newRow, newCol])
-           
-          
-      
-          //   for(let i= adjacencyList.length-1; i<=row+a; i++){
-          //       adjacencyList.push([])
-
-          //   }
-          
-            const neighbour = new Node(newRow, newCol)
-           
-            const neighbourCoordinates = (JSON.stringify([neighbour.row,neighbour.col]))
-            
-           if(!visited.has(neighbourCoordinates)){
-            visited.add(neighbourCoordinates)
-           
-             console.log(`Neighbour of: [${row},${col}] -- [${newRow},${newCol}]`)
-              
-            knightMove([newRow, newCol], [lastRow, lastCol])
-           
-           } 
-
-           if(neighbour.row === lastRow && neighbour.col === lastCol){
-            console.log(`Found: ${[lastRow, lastCol]}`)
-           }           
-          //  adjacencyList[newRow].push(newCol)
-          //  knightMove([newRow, newCol], [lastRow, lastCol])
+  if (
+    row < 0 ||
+    row > 7 ||
+    row === undefined ||
+    col === undefined ||
+    col > 7 ||
+    col === undefined
+  ) {
+    console.log(`Coordinates must be between 0 & 7`);
+  } else {
+    //Get neighbours coordinates by adding +/-1 & +/-2 to coordinates
+    const coordModifiers = [
+      [-1, 2],
+      [1, 2],
+      [-1, -2],
+      [1, -2],
+      [-2, 1],
+      [2, 1],
+      [-2, -1],
+      [2, -1],
+    ];
+ 
+    for (let coord of coordModifiers) {
+      const newRow = row + coord[0];
+      const newCol = col + coord[1];
+      if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
+        const neighbourCoordinates = `${newRow},${newCol}`;
+        if (!visited.has(neighbourCoordinates)) {
+          const neighbour = new Node(newRow, newCol);
+          start.neighbours.add(neighbour);
         }
-         if((col+a)>=0 && (col+a<=7) && (row+b)>=0 && (row+b)<=7){
-           const newRow = row+b;
-        const newCol = col+a
-          //  destinations.push([newRow, newCol])
-          //  coordLinks.push([newRow, newCol])
-           
-        
-            // for(let i= adjacencyList.length-1; i<=row+b; i++){
-            //     adjacencyList.push([])
-               
-            //                   }
-          // console.log(`current elements (b,a):`)
-          //   console.log(`row: ${row}, col: ${col}`)
-          //   console.log(`lastRow: ${lastRow}, lastCol: ${lastCol} `)
-          //   console.log(`a: ${a}, b: ${b}`)
-           const neighbour = new Node(newRow, newCol, n+1)
-           
-            const neighbourCoordinates = (JSON.stringify([neighbour.row,neighbour.col]))
-            
-           if(!visited.has(neighbourCoordinates)){
-            visited.add(neighbourCoordinates)
-            
-            knightMove([newRow, newCol], [lastRow, lastCol])
-          
-           } 
-            if(newRow === lastRow && newCol === lastCol){
-          console.log(`Found: ${[lastRow, lastCol]}: ${n}`)
-           }     
-          //  adjacencyList[newRow].push(newCol)  
-         
-          }
-           
-        })
-       
-    })
+      }
+    }
+  }
+  return start;
+};
+  
 
-   masterArray.push([[row, col], coordLinks])
+const createData = ([row, col], [endRow, endCol]) => {
+  visited.add(`${row},${col}`)
+  const startCell = getNeighbours([row, col])
+  const queueArray = [startCell];
+const previous = new Map()
+  while (queueArray.length >= 1) {
+  
+      
+      let currentCell = queueArray.shift();;
+      const neighbourList = currentCell.neighbours;
+      const currentCoordinates = `${currentCell.row},${currentCell.col}`;
+      const neighbourCoords = [];
+    
+     
+      // adjacencyList.set(currentCoordinates, neighbourCoords);
+      neighbourList.forEach((neighbour) => {
+      
    
-    // if(!visited.has([lastRow,lastCol])){
+       
+        const neighbourCoordinates = `${neighbour.row},${neighbour.col}`;
+        
+           if(neighbourCoordinates !== currentCoordinates) neighbourCoords.push(neighbourCoordinates);
+        if (!visited.has(neighbourCoordinates)) {
+           const newNeighbour = getNeighbours([neighbour.row, neighbour.col]);
+           
+         previous.set(neighbourCoordinates, currentCoordinates)
+          
+          visited.add(neighbourCoordinates);
+       
+          
+       
+           queueArray.push(newNeighbour);
+        }
+    
 
-    // }
-
-// return {destinations, adjacencyList, adjList}
 
 
 
+      });
+       
+ 
+ if (currentCell.row === endRow && currentCell.col === endCol) {
+      let path = [currentCoordinates];
+      while(previous.has(path[0])){
+       
+        path.unshift(previous.get(path[0]))
+       
+       
+     
+      }
+ 
+      return path
+    }
+  }
+  
+};
+
+
+const knightMoves=([row, col], [endRow, endCol])=>{
+  const result = createData([row, col], [endRow, endCol]);
+
+  const message = () => {
+  console.log(`=> You made it in ${result.length} moves! Hre's your path:`)
+  moves();
 }
 
-console.log(knightMove([3,3], [5,3]))
+  const moves = ()  => result.forEach(move => {
+   console.log(`[${move}]`)})
 
-//  const visitNeighbours = () => {
-
-//  }
-
-// console.log(visited)
-// console.log(knightMove.destinations)
+   return message()
+  }
+  
 
 
 
+knightMoves([3,3],[7,7])

@@ -2,15 +2,7 @@
 
 
 
-class Board{
-  constructor([row, col], [endRow, endCol]){
-    this.start = createData([row, col], [endRow, endCol])
-  }
-  countMoves(){
-   let startingCell = this.start;
 
-  }
-}
 
 
 class Node {
@@ -19,11 +11,12 @@ class Node {
     this.col = col;
     this.neighbours = new Set([]);
     this.coordinates = [row, col];
+
   }
 }
 
 const visited = new Set([]);
-const adjacencyList = new Map();
+// const adjacencyList = new Map();
 
 //Get neighbours of square
 const getNeighbours = ([row, col]) => {
@@ -58,7 +51,7 @@ const getNeighbours = ([row, col]) => {
       const newRow = row + coord[0];
       const newCol = col + coord[1];
       if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
-        const neighbourCoordinates = `${newRow}, ${newCol}`;
+        const neighbourCoordinates = `${newRow},${newCol}`;
         if (!visited.has(neighbourCoordinates)) {
           const neighbour = new Node(newRow, newCol);
           start.neighbours.add(neighbour);
@@ -68,66 +61,81 @@ const getNeighbours = ([row, col]) => {
   }
   return start;
 };
+  
 
 const createData = ([row, col], [endRow, endCol]) => {
-  visited.add(`${row}, ${col}`)
-  const queueArray = [getNeighbours([row, col])];
-
+  visited.add(`${row},${col}`)
+  const startCell = getNeighbours([row, col])
+  const queueArray = [startCell];
+const previous = new Map()
   while (queueArray.length >= 1) {
   
       
-      const currentCell = queueArray.shift();;
+      let currentCell = queueArray.shift();;
       const neighbourList = currentCell.neighbours;
-      const currentCoordinates = `${currentCell.row}, ${currentCell.col}`;
+      const currentCoordinates = `${currentCell.row},${currentCell.col}`;
       const neighbourCoords = [];
-      
+    
      
-      adjacencyList.set(currentCoordinates, neighbourCoords);
+      // adjacencyList.set(currentCoordinates, neighbourCoords);
       neighbourList.forEach((neighbour) => {
+      
+   
        
-        const neighbourCoordinates = `${neighbour.row}, ${neighbour.col}`;
+        const neighbourCoordinates = `${neighbour.row},${neighbour.col}`;
+        
+           if(neighbourCoordinates !== currentCoordinates) neighbourCoords.push(neighbourCoordinates);
         if (!visited.has(neighbourCoordinates)) {
            const newNeighbour = getNeighbours([neighbour.row, neighbour.col]);
-          neighbourCoords.push([neighbour.row, neighbour.col]);
+           
+         previous.set(neighbourCoordinates, currentCoordinates)
+          
           visited.add(neighbourCoordinates);
+       
+          
+       
            queueArray.push(newNeighbour);
         }
+    
+
+
+
+
       });
+       
  
-      
-  
-    if (currentCell.row === endRow && currentCell.col === endCol) {
-      return adjacencyList;
+ if (currentCell.row === endRow && currentCell.col === endCol) {
+      let path = [currentCoordinates];
+      while(previous.has(path[0])){
+       
+        path.unshift(previous.get(path[0]))
+       
+       
+     
+      }
+ 
+      return path
     }
-  
   }
- 
+  
 };
 
 
-console.log(visited)
-  console.log(getNeighbours([3,3]))
+const knightMoves=([row, col], [endRow, endCol])=>{
+  const result = createData([row, col], [endRow, endCol]);
 
-createData([3,3],[5,7])
+  const message = () => {
+  console.log(`=> You made it in ${result.length} moves! Hre's your path:`)
+  moves();
+}
 
+  const moves = ()  => result.forEach(move => {
+   console.log(`[${move}]`)})
 
-
-console.log(adjacencyList)
-
-console.log(`%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%`)
-
-console.log(visited)
-
-
-
-
+   return message()
+  }
+  
 
 
 
-
-
-
-
-
-
-
+knightMoves([3,3],[7,7])
